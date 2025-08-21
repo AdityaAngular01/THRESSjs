@@ -74,6 +74,7 @@ container.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
+
 // Lights
 scene.add(new THREE.AmbientLight(0x334455, 0.2));
 const rim = new THREE.DirectionalLight(0x88aaff, 0.4);
@@ -92,16 +93,6 @@ for (let i = 0; i < starCount; i++) {
     const z = r * Math.sin(phi) * Math.sin(theta);
     starPositions.set([x, y, z], i * 3);
 }
-// const starsGeom = new THREE.BufferGeometry();
-// starsGeom.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-// const starsMat = new THREE.PointsMaterial({
-//     size: 0.06,
-//     transparent: true,
-//     opacity: 0.85,
-//     depthWrite: false,
-//     blending: THREE.AdditiveBlending,
-// });
-// scene.add(new THREE.Points(starsGeom, starsMat));
 
 // Stars geometry
 const starsGeom = new THREE.BufferGeometry();
@@ -157,13 +148,13 @@ const starsMat = new THREE.ShaderMaterial({
 const stars = new THREE.Points(starsGeom, starsMat);
 scene.add(stars);
 
-
-
-
 // Earth dotted
 const earthRadius = 1.4;
 const earthGroup = new THREE.Group();
 scene.add(earthGroup);
+
+controls.minDistance = earthRadius * 2.5;  // closest allowed
+controls.maxDistance = earthRadius * 30;
 
 const dots = makeFibonacciSpherePoints(12000, earthRadius);
 const dotGeom = new THREE.BufferGeometry();
@@ -179,7 +170,7 @@ const dotMat = new THREE.PointsMaterial({
 earthGroup.add(new THREE.Points(dotGeom, dotMat));
 
 // India position
-const INDIA = { lat: 18.562809777239593, lon: 73.78276311752121 };
+const INDIA = { lat: 18.562809777239593, lon: 73.78276311752121 }; // Pune
 const indiaPos = latLonToVec3(INDIA.lat, INDIA.lon, earthRadius * 1.001);
 const indiaDot = makeSignalDot(0.020, 0xff6666);
 indiaDot.position.copy(indiaPos);
