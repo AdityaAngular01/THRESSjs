@@ -124,7 +124,7 @@ earthGroup.add(new THREE.Points(dotGeom, dotMat));
 // India position
 const INDIA = { lat: 18.562809777239593, lon: 73.78276311752121 };
 const indiaPos = latLonToVec3(INDIA.lat, INDIA.lon, earthRadius * 1.001);
-const indiaDot = makeSignalDot(0.015, 0xff6666);
+const indiaDot = makeSignalDot(0.020, 0xff6666);
 indiaDot.position.copy(indiaPos);
 earthGroup.add(indiaDot);
 gsap.to(indiaDot.scale, { x: 1.8, y: 1.8, z: 1.8, yoyo: true, repeat: -1, duration: 1.2 });
@@ -169,6 +169,9 @@ const TARGETS = [
 //     });
 //
 // });
+
+
+
 TARGETS.forEach((t, idx) => {
     const targetPos = latLonToVec3(t.lat, t.lon, earthRadius * 1.001);
     const marker = makeSignalDot(0.015, 0xffff66);
@@ -191,7 +194,7 @@ TARGETS.forEach((t, idx) => {
 
     // Neon pulse tube
     const neonMat = new THREE.MeshBasicMaterial({
-        color: 0xff00ff, // neon pink
+        color: 0xff00ff,
         transparent: true,
         opacity: 0.9,
         blending: THREE.AdditiveBlending,
@@ -241,7 +244,7 @@ TARGETS.forEach((t, idx) => {
             neonTube.geometry = new THREE.TubeGeometry(
                 segmentCurve,
                 64,    // tubular segments
-                0.02,  // thickness
+                0.01,  // thickness
                 16,    // radial segments
                 false
             );
