@@ -9,6 +9,7 @@
             margin: 0;
             background: #000;
             overflow: hidden;
+            font-family: "Inter", system-ui, sans-serif;
         }
         #app {
             width: 100vw;
@@ -17,24 +18,54 @@
         }
         .info {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            background: rgba(20, 20, 30, 0.65);
-            color: #aef;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
+            top: 20px;
+            left: 20px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(25, 25, 35, 0.55);
+            color: #e8f4ff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px) saturate(150%);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            max-width: 280px;
+            animation: fadeIn 1s ease forwards;
+        }
+        .info h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .info small {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #ffd166;
+        }
+        .info .tagline {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            color: #cde6ff;
+        }
+        .info .hint {
+            font-size: 0.78rem;
+            color: #9acdff;
+            font-style: italic;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="info">
-        🌍 Dotted Earth <br />
-        Pulsing signals from India → world<br />
-        Drag to orbit • Scroll to zoom
+        <h2>🌍 Dotted Earth <small>Aditya Kalambe</small></h2>
+        <p class="tagline">✨ Pulsing signals from <strong>India</strong> → World</p>
+        <p class="hint">🖱️ Drag to orbit • 🔍 Scroll to zoom</p>
     </div>
 </div>
 </body>
