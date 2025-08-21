@@ -92,16 +92,73 @@ for (let i = 0; i < starCount; i++) {
     const z = r * Math.sin(phi) * Math.sin(theta);
     starPositions.set([x, y, z], i * 3);
 }
+// const starsGeom = new THREE.BufferGeometry();
+// starsGeom.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+// const starsMat = new THREE.PointsMaterial({
+//     size: 0.06,
+//     transparent: true,
+//     opacity: 0.85,
+//     depthWrite: false,
+//     blending: THREE.AdditiveBlending,
+// });
+// scene.add(new THREE.Points(starsGeom, starsMat));
+
+// Stars geometry
 const starsGeom = new THREE.BufferGeometry();
 starsGeom.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-const starsMat = new THREE.PointsMaterial({
-    size: 0.06,
+
+// Each star gets its own random flicker speed
+const starFlicker = new Float32Array(starPositions.length / 3);
+for (let i = 0; i < starFlicker.length; i++) {
+    starFlicker[i] = Math.random() * 2.0 + 0.5; // flicker speed
+}
+starsGeom.setAttribute("flicker", new THREE.BufferAttribute(starFlicker, 1));
+
+// ShaderMaterial for twinkling stars ✨
+const starsMat = new THREE.ShaderMaterial({
     transparent: true,
-    opacity: 0.85,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
+    uniforms: {
+        uTime: { value: 0.0 },
+        uColor: { value: new THREE.Color(0xffffff) }
+    },
+    vertexShader: `
+        attribute float flicker;
+        varying float vFlicker;
+        void main() {
+            vFlicker = flicker;
+            gl_PointSize = 3.0; // star size (adjust if needed)
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColor;
+        varying float vFlicker;
+
+        void main() {
+            // radial fade for round stars
+            vec2 uv = gl_PointCoord - 0.5;
+            float dist = length(uv);
+            if (dist > 0.5) discard; // make it round
+
+            // Twinkle factor
+            float twinkle = 0.5 + 0.5 * sin(uTime * vFlicker + vFlicker * 10.0);
+
+            vec3 color = uColor * twinkle;
+            float alpha = (1.0 - smoothstep(0.3, 0.5, dist)) * twinkle;
+
+            gl_FragColor = vec4(color, alpha);
+        }
+    `
 });
-scene.add(new THREE.Points(starsGeom, starsMat));
+
+const stars = new THREE.Points(starsGeom, starsMat);
+scene.add(stars);
+
+
+
 
 // Earth dotted
 const earthRadius = 1.4;
@@ -182,7 +239,7 @@ TARGETS.forEach((t, idx) => {
 
     // Base faint arc
     const baseTube = new THREE.Mesh(
-        makeTubeFromCurve(curve, 0.01, 160),
+        makeTubeFromCurve(curve, 0.003, 160),
         new THREE.MeshBasicMaterial({
             color: 0x00ffff,
             transparent: true,
@@ -193,12 +250,30 @@ TARGETS.forEach((t, idx) => {
     earthGroup.add(baseTube);
 
     // Neon pulse tube
-    const neonMat = new THREE.MeshBasicMaterial({
-        color: 0xff00ff,
+    const neonMat = new THREE.ShaderMaterial({
         transparent: true,
-        opacity: 0.9,
         blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide,
+        depthWrite: false,
+        uniforms: {
+            uColor: { value: new THREE.Color(0xffe6c5) }
+        },
+        vertexShader: `
+        varying float vPos;
+        void main() {
+            // vPos is the position along the tube (0 → 1)
+            vPos = uv.x;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+        fragmentShader: `
+        uniform vec3 uColor;
+        varying float vPos;
+        void main() {
+            // fade from 1.0 (head) → 0.0 (tail)
+            float alpha = vPos;  
+            gl_FragColor = vec4(uColor, alpha);
+        }
+    `
     });
 
     let neonTube = new THREE.Mesh(new THREE.TubeGeometry(curve, 32, 0.02, 16, false), neonMat);
@@ -294,6 +369,8 @@ window.addEventListener("resize", () => {
 // Loop
 function animate() {
     requestAnimationFrame(animate);
+    // In your animation loop
+    starsMat.uniforms.uTime.value += 0.05;
     controls.update();
     renderer.render(scene, camera);
 }
